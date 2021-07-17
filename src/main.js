@@ -1,7 +1,10 @@
-let clock, gui, mixer, actions, activeAction;
-let camera, scene, renderer, controls, robot, face;
+let clock, mixer, actions, activeAction, previousAction;
+let camera, scene, renderer, controls;
 
-const api = { state: 'Walking' };
+let robot, face;
+const api = { state: 'Walking'};
+const states = ['Idle', 'Walking', 'Running', 'Dance', 'Death', 'Sitting', 'Standing'];
+const emotes = ['Jump', 'Yes', 'No', 'Wave', 'Punch', 'ThumbsUp'];
 
 init();
 animate();
@@ -40,9 +43,10 @@ function init() {
     const loader = new THREE.GLTFLoader();
     loader.load('/res/RobotExpressive.glb', function (gltf) {
         robot = gltf.scene;
+        robot.position.set(10, 0, 10);
         scene.add(robot);
-        createGUI(robot, gltf.animations);
-
+        queryActions(robot, gltf.animations);
+        createTweet();
     }, undefined, function (e) {
         console.error(e);
     });
@@ -59,10 +63,7 @@ function init() {
 
 }
 
-function createGUI(model, animations) {
-    const states = ['Idle', 'Walking', 'Running', 'Dance', 'Death', 'Sitting', 'Standing'];
-    const emotes = ['Jump', 'Yes', 'No', 'Wave', 'Punch', 'ThumbsUp'];
-
+function queryActions(model, animations) {
     mixer = new THREE.AnimationMixer(model);
     actions = {};
     for (let i = 0; i < animations.length; i++) {
@@ -77,34 +78,49 @@ function createGUI(model, animations) {
     }
     activeAction = actions['Walking'];
     activeAction.play();
-    robot.position.z  = -10 
-    createTweet();
 }
 
-
 function createTweet() {
-    console.log(robot.position)
+    let steps = 10
     let offset = { step: 0 }      // 起始出發值，之後 onUpdate 會一直改變他 
-    let target = { step: 20 }   // 起始目標值，之後會一直被改變
+    let target = { step: steps }   // 起始目標值，之後會一直被改變
 
     // Robot 走動補間動畫
     const onUpdate = () => {
         // 移動
-        console.log(offset.step)
+        //console.log(offset.step)
         robot.position.z = offset.step
     }
 
-    let tween = new TWEEN.Tween(offset)         // 起點為 offset
-        .to(target, 5000)                       // 在 5000ms 內移動至 target
+    let tween = new TWEEN.Tween(offset)             // 起點為 offset
+        .to(target, 330*steps)                         // 設訂多少ms內移動至 target
         .onUpdate(onUpdate)
         .onComplete(() => {
             tween.stop()
+            changeEmotion()
         })
 
     // 開始移動
     tween.start()
 }
 
+// switch actions
+function fadeToAction(name, duration) {
+    console.log(name)
+    previousAction = activeAction
+    activeAction = actions[name]
+
+    if (previousAction !== activeAction) {
+        previousAction.fadeOut(duration)
+    }
+
+    activeAction
+        .reset()
+        .setEffectiveTimeScale(1)
+        .setEffectiveWeight(1)
+        .fadeIn(duration)
+        .play()
+}
 
 function onWindowResize() {
 
@@ -124,4 +140,29 @@ function animate(time) {
     TWEEN.update(time);
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
+}
+
+function randint(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+    
+function changeEmotion(){
+    function restoreEmotion() {
+        mixer.removeEventListener('finished', restoreEmotion)
+        fadeToAction(api.state, 0.2)
+    }
+    emotionID = randint(0, emotes.length-1)
+    fadeToAction(emotes[emotionID], 1)
+    mixer.addEventListener('finished', restoreEmotion)
+}
+
+function changeState(){
+    function restoreState() {
+        mixer.removeEventListener('finished', restoreState)
+        fadeToAction(api.state, 0.2)
+    }
+    statesID = randint(0, states.length-1)
+    fadeToAction(states[statesID], 1)
+    console.log(states[statesID])
+    mixer.addEventListener('finished', restoreState)
 }
