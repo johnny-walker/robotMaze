@@ -16,7 +16,7 @@ app.get('/*', function (req, res) {
 })
 
 // listen specific PORT
-const port = 3000
+const port = 5000
 const server = app.listen(port, function () {
     console.log('Node server is running at port: ' + port)
 })

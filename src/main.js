@@ -2,21 +2,22 @@ let clock, mixer;
 let camera, scene, renderer, controls;
 
 let robot, face, actions, expressions, activeAction, previousAction;
-const api = { state: 'Walking'};
+const api = { state: 'Running' };
 const states = ['Idle', 'Walking', 'Running', 'Dance', 'Death', 'Sitting', 'Standing'];
 const emotes = ['Jump', 'Yes', 'No', 'Wave', 'Punch', 'ThumbsUp'];
+scaler = 2.5
 
 init();
 animate();
 
 function init() {
-
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 100);
     camera.position.set(20, 20, 50);
-    camera.lookAt(new THREE.Vector3(0, 2, 0));
+    camera.lookAt(new THREE.Vector3(0, 1, 0));
 
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xe0e0e0);
+    scene.background = new THREE.Color(0xd0d0d0);
+    
 
     clock = new THREE.Clock();
 
@@ -29,23 +30,14 @@ function init() {
     dirLight.position.set(0, 20, 10);
     scene.add(dirLight);
 
-    // ground
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false }));
-    mesh.rotation.x = - Math.PI / 2;
-    scene.add(mesh);
-
-    const grid = new THREE.GridHelper(50, 20, 0x000000, 0x000000);
-    grid.material.opacity = 0.1;
-    grid.material.transparent = true;
-    scene.add(grid);
-
     // robot
     const loader = new THREE.GLTFLoader();
     loader.load('/res/RobotExpressive.glb', function (gltf) {
         robot = gltf.scene;
-        robot.position.set(10, 0, 10);
         scene.add(robot);
         queryActions(robot, gltf.animations);
+
+        createGround()
         createTweet();
     }, undefined, function (e) {
         console.error(e);
@@ -60,7 +52,31 @@ function init() {
     controls = new THREE.OrbitControls(camera, renderer.domElement);
 
     window.addEventListener('resize', onWindowResize);
+}
 
+function createGround() {
+    // ground
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false }));
+    mesh.rotation.x = - Math.PI / 2;
+    scene.add(mesh);
+
+    const grid = new THREE.GridHelper(50, 20, 0x000000, 0x000000);
+    grid.material.opacity = 0.2;
+    grid.material.transparent = true;
+    scene.add(grid);
+
+    createCube( 9, 0, -6);
+    createCube( 3, 0,  3);
+    createCube(-7, 0,  6);
+}
+
+function createCube(x, y, z) {
+    // cube
+    let cubeGeo = new THREE.BoxGeometry( 3, 3, 3 );
+    let cubeMaterial = new THREE.MeshLambertMaterial( { color: 0xfeb74c, map: new THREE.TextureLoader().load( 'res/square.png' ) } );
+    let voxel = new THREE.Mesh( cubeGeo, cubeMaterial );
+    voxel.position.set(x*scaler, y*scaler+1.5, z*scaler)
+    scene.add( voxel );
 }
 
 function queryActions(model, animations) {
@@ -79,34 +95,8 @@ function queryActions(model, animations) {
     face = model.getObjectByName( 'Head_4' );
     expressions = Object.keys( face.morphTargetDictionary );
 
-    activeAction = actions['Walking'];
+    activeAction = actions[api.state];
     activeAction.play();
-}
-
-function createTweet() {
-    let steps = 10
-    let offset = { step: 0 }      // 起始出發值，之後 onUpdate 會一直改變他 
-    let target = { step: steps }   // 起始目標值，之後會一直被改變
-
-    // Robot 走動補間動畫
-    const onUpdate = () => {
-        // 移動
-        //console.log(offset.step)
-        robot.position.z = offset.step
-    }
-
-    let tween = new TWEEN.Tween(offset)             // 起點為 offset
-        .to(target, 330*steps)                         // 設訂多少ms內移動至 target
-        .onUpdate(onUpdate)
-        .onComplete(() => {
-            tween.stop()
-            morphFace()
-            changeState()
-            //changeEmotion()
-        })
-
-    // 開始移動
-    tween.start()
 }
 
 // switch actions
@@ -133,7 +123,6 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-//
 function animate(time) {
     const dt = clock.getDelta();
     if (mixer) {
@@ -143,6 +132,10 @@ function animate(time) {
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
 }
+
+// change robot status
+var dirs = ['south', 'east','north', 'west'];
+var loop = 0;
 
 function randint(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -168,11 +161,79 @@ function changeState(){
     mixer.addEventListener('finished', restoreState)
 }
 
-
 function morphFace(){
     let id = randint(0, expressions.length-1)
     let value = randint(0, 10)
 
     console.log(expressions[id])
     face.morphTargetInfluences[id] = value/10;
+}
+
+
+function createTweet() {
+    let steps = 8 * scaler
+    let speed = 400
+    let denominator = (api.state == 'Walking') ? 1 : 2;
+    
+    let offset = { step: 0 }                // 起始出發值，之後 onUpdate 會一直改變他 
+    let target = { step: steps }             // 起始目標值，之後會一直被改變
+    let position = new THREE.Vector3 (0, 0, 0)
+    position.copy( robot.position );
+    console.log(position)
+
+    let index = loop%4 
+    let direction = dirs[index]
+
+    const onUpdate = () => {
+        // 移動
+        //console.log(offset.step)
+        if (direction == 'south') {
+            robot.position.z = position.z + offset.step
+        } else if (direction == 'north') {
+            robot.position.z =  position.z - offset.step
+        } else if (direction == 'east') {
+            robot.position.x = position.x + offset.step
+        } else if (direction == 'west') {
+            robot.position.x = position.x - offset.step
+        }
+    }
+
+    let tween = new TWEEN.Tween(offset)                     // 起點為 offset
+        .to(target, speed*steps/denominator)                // 設訂多少ms內移動至 target
+        .onUpdate(onUpdate)
+        .onComplete(() => {
+            tween.stop()
+            morphFace()
+            changeState()
+            //changeEmotion()
+            createRotationTweet(Math.PI/2);
+            loop++;
+        })
+
+    // 開始移動
+    tween.start()
+}
+
+//radian
+function createRotationTweet(angle) {
+    let offset = { step: robot.rotation.y }      // 起始出發值，之後 onUpdate 會一直改變他 
+    let target = { step: robot.rotation.y + angle }   // 起始目標值，之後會一直被改變
+
+    const onUpdate = () => {
+        // 移動
+        robot.rotation.y = offset.step
+    }
+
+    let tween = new TWEEN.Tween(offset)                     // 起點為 offset
+        .to(target, 1000)                // 設訂多少ms內移動至 target
+        .onUpdate(onUpdate)
+        .onComplete(() => {
+            tween.stop()
+            morphFace()
+            //changeEmotion()
+            createTweet()
+        })
+
+    // 開始移動
+    tween.start()
 }
