@@ -1,7 +1,7 @@
-let clock, mixer, actions, activeAction, previousAction;
+let clock, mixer;
 let camera, scene, renderer, controls;
 
-let robot, face;
+let robot, face, actions, expressions, activeAction, previousAction;
 const api = { state: 'Walking'};
 const states = ['Idle', 'Walking', 'Running', 'Dance', 'Death', 'Sitting', 'Standing'];
 const emotes = ['Jump', 'Yes', 'No', 'Wave', 'Punch', 'ThumbsUp'];
@@ -76,6 +76,9 @@ function queryActions(model, animations) {
             action.loop = THREE.LoopOnce;
         }
     }
+    face = model.getObjectByName( 'Head_4' );
+    expressions = Object.keys( face.morphTargetDictionary );
+
     activeAction = actions['Walking'];
     activeAction.play();
 }
@@ -97,7 +100,9 @@ function createTweet() {
         .onUpdate(onUpdate)
         .onComplete(() => {
             tween.stop()
-            changeEmotion()
+            morphFace()
+            changeState()
+            //changeEmotion()
         })
 
     // 開始移動
@@ -123,12 +128,9 @@ function fadeToAction(name, duration) {
 }
 
 function onWindowResize() {
-
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-
     renderer.setSize(window.innerWidth, window.innerHeight);
-
 }
 
 //
@@ -159,10 +161,18 @@ function changeEmotion(){
 function changeState(){
     function restoreState() {
         mixer.removeEventListener('finished', restoreState)
-        fadeToAction(api.state, 0.2)
+        fadeToAction(api.state, 0.5)
     }
     statesID = randint(0, states.length-1)
     fadeToAction(states[statesID], 1)
-    console.log(states[statesID])
     mixer.addEventListener('finished', restoreState)
+}
+
+
+function morphFace(){
+    let id = randint(0, expressions.length-1)
+    let value = randint(0, 10)
+
+    console.log(expressions[id])
+    face.morphTargetInfluences[id] = value/10;
 }
