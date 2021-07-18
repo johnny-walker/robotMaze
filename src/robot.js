@@ -85,10 +85,9 @@ function changeState(){
 
 function morphFace(){
     let id = randint(0, expressions.length-1)
-    let value = randint(0, 10)
-
-    console.log(expressions[id])
-    face.morphTargetInfluences[id] = value/10;
+    let value = randint(0, 10)/10
+    face.morphTargetInfluences[id] = value
+    console.log(expressions[id], value)
 }
 
 // movment
@@ -101,7 +100,6 @@ function createTweet() {
     let target = { step: steps }             // 起始目標值，之後會一直被改變
     let position = new THREE.Vector3 (0, 0, 0)
     position.copy( robot.position );
-    console.log(position)
 
     let index = loop%4 
     let direction = dirs[index]
