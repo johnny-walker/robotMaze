@@ -15,8 +15,10 @@ app.get('/*', function (req, res) {
     res.sendFile(__dirname + req.url)
 })
 
-// listen specific PORT
-const port = 5000
-const server = app.listen(port, function () {
-    console.log('Node server is running at port: ' + port)
+//port 號會由 Heroku 給予，因此不再自行指定
+const port = process.env.PORT || 3000;
+
+app.listen(port, function () {
+  let str = 'app listening on port ' + port + '!'
+  console.log(str)
 })

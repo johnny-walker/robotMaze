@@ -1,11 +1,13 @@
 let clock, mixer;
 let camera, scene, renderer, controls;
 
+let scaler = 2.5
 let robot, face, actions, expressions, activeAction, previousAction;
 const api = { state: 'Running' };
 const states = ['Idle', 'Walking', 'Running', 'Dance', 'Death', 'Sitting', 'Standing'];
 const emotes = ['Jump', 'Yes', 'No', 'Wave', 'Punch', 'ThumbsUp'];
-scaler = 2.5
+
+let stars = []
 
 init();
 animate();
@@ -36,7 +38,8 @@ function init() {
         robot = gltf.scene;
         scene.add(robot);
         queryActions(robot, gltf.animations);
-
+        
+        createStar(1)
         createGround()
         createTweet();
     }, undefined, function (e) {
@@ -129,6 +132,10 @@ function animate(time) {
         mixer.update(dt);
     }
     TWEEN.update(time);
+    // rotate stars
+    for (let i = 0; i < stars.length; i++) {
+        stars[i].rotation.z += 0.01
+    }
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
 }
@@ -169,7 +176,7 @@ function morphFace(){
     face.morphTargetInfluences[id] = value/10;
 }
 
-
+// movment
 function createTweet() {
     let steps = 8 * scaler
     let speed = 400
@@ -184,8 +191,8 @@ function createTweet() {
     let index = loop%4 
     let direction = dirs[index]
 
+    // 移動
     const onUpdate = () => {
-        // 移動
         //console.log(offset.step)
         if (direction == 'south') {
             robot.position.z = position.z + offset.step
@@ -200,6 +207,7 @@ function createTweet() {
 
     let tween = new TWEEN.Tween(offset)                     // 起點為 offset
         .to(target, speed*steps/denominator)                // 設訂多少ms內移動至 target
+        //.easing(TWEEN.Easing.Quadratic.Out)
         .onUpdate(onUpdate)
         .onComplete(() => {
             tween.stop()
@@ -214,18 +222,19 @@ function createTweet() {
     tween.start()
 }
 
-//radian
+// rotation, radian angle
 function createRotationTweet(angle) {
-    let offset = { step: robot.rotation.y }      // 起始出發值，之後 onUpdate 會一直改變他 
-    let target = { step: robot.rotation.y + angle }   // 起始目標值，之後會一直被改變
+    let offset = { step: robot.rotation.y }                 // 起始出發值，之後 onUpdate 會一直改變他 
+    let target = { step: robot.rotation.y + angle }         // 起始目標值，之後會一直被改變
 
+    // 旋轉
     const onUpdate = () => {
-        // 移動
         robot.rotation.y = offset.step
     }
 
     let tween = new TWEEN.Tween(offset)                     // 起點為 offset
-        .to(target, 1000)                // 設訂多少ms內移動至 target
+        .to(target, 1000)                                   // 設訂多少ms內移動至 target
+        //.easing(TWEEN.Easing.Quadratic.Out)
         .onUpdate(onUpdate)
         .onComplete(() => {
             tween.stop()
@@ -236,4 +245,30 @@ function createRotationTweet(angle) {
 
     // 開始移動
     tween.start()
+}
+
+// star
+let loader = new THREE.OBJLoader() 
+function createStar(count) {
+
+  let starMat = new THREE.MeshStandardMaterial({
+    color: 0xfeb74c
+  })
+
+  for (let i=0; i< count; i++) {
+    loader.load('res/star.obj', function(mesh) {
+        mesh.children.forEach(function(child) {
+        child.material = starMat
+        child.geometry.computeFaceNormals()
+        child.geometry.computeVertexNormals()
+      })
+      mesh.scale.set(0.15, 0.15, 0.15)
+      mesh.rotation.x = Math.PI / 2;
+      mesh.position.set(-1*scaler, 2*scaler, 1*scaler)
+      scene.add(mesh)
+      stars.push(mesh)
+
+    })
+
+  }
 }
