@@ -11,7 +11,7 @@ const fsPromises = fs.promises;
 async function loadMap() {
     try {
         // STEP 1: 讀取 CSV 檔
-        const inputFile = __dirname + '/res/map01.csv'
+        const inputFile = __dirname + '/res/map02.csv'
         const input = await fsPromises.readFile(inputFile)
 
         // STEP 2：建立讀出 CSV 用的陣列和 parser

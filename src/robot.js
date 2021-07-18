@@ -1,16 +1,18 @@
 let robot, face, actions, expressions, activeAction, previousAction;
+
 const api = { state: 'Running' };
 const states = ['Idle', 'Walking', 'Running', 'Dance', 'Death', 'Sitting', 'Standing'];
 const emotes = ['Jump', 'Yes', 'No', 'Wave', 'Punch', 'ThumbsUp'];
 
-function createRobot() {
+function createRobot(x, z) {
     const loader = new THREE.GLTFLoader();
     loader.load('/res/RobotExpressive.glb', function (gltf) {
         robot = gltf.scene;
+        robot.position.x = x * scaler;
+        robot.position.z = z * scaler;
         scene.add(robot);
         queryActions(robot, gltf.animations);
-
-        createTweet();
+        nextStep();
 
     }, undefined, function (e) {
         console.error(e);
@@ -87,22 +89,20 @@ function morphFace(){
     let id = randint(0, expressions.length-1)
     let value = randint(0, 10)/10
     face.morphTargetInfluences[id] = value
-    console.log(expressions[id], value)
+    //console.log(expressions[id], value)
 }
 
 // movment
-function createTweet() {
+function createTweet(direction) {
     let steps = 1 * scaler
     let speed = 400
     let denominator = (api.state == 'Walking') ? 1 : 2;
     
-    let offset = { step: 0 }                // 起始出發值，之後 onUpdate 會一直改變他 
-    let target = { step: steps }             // 起始目標值，之後會一直被改變
+    let offset = { step: 0 }                    // 起始出發值，之後 onUpdate 會一直改變他 
+    let target = { step: steps }                // 起始目標值，之後會一直被改變
     let position = new THREE.Vector3 (0, 0, 0)
+    //console.log(robot.position)
     position.copy( robot.position );
-
-    let index = loop%4 
-    let direction = dirs[index]
 
     // 移動
     const onUpdate = () => {
@@ -110,7 +110,7 @@ function createTweet() {
         if (direction == 'south') {
             robot.position.z = position.z + offset.step
         } else if (direction == 'north') {
-            robot.position.z =  position.z - offset.step
+            robot.position.z =  position.z - offset.step 
         } else if (direction == 'east') {
             robot.position.x = position.x + offset.step
         } else if (direction == 'west') {
@@ -128,10 +128,7 @@ function createTweet() {
             morphFace()
             //changeState()
             //changeEmotion()
-
             nextStep()
-            createRotationTweet(Math.PI/2);
-            loop++;
         })
 
     // 開始移動
@@ -140,9 +137,13 @@ function createTweet() {
 
 // rotation, radian angle
 function createRotationTweet(angle) {
-    let offset = { step: robot.rotation.y }                 // 起始出發值，之後 onUpdate 會一直改變他 
-    let target = { step: robot.rotation.y + angle }         // 起始目標值，之後會一直被改變
+    robot.rotation.y = angle
+    //createTweet()
+    return
 
+    let offset = { step: 0 }                 // 起始出發值，之後 onUpdate 會一直改變他 
+    let target = { step: angle }         // 起始目標值，之後會一直被改變
+    
     // 旋轉
     const onUpdate = () => {
         robot.rotation.y = offset.step
@@ -162,8 +163,4 @@ function createRotationTweet(angle) {
 
     // 開始移動
     tween.start()
-}
-
-function nextStep() {
-
 }

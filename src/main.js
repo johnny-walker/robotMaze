@@ -4,15 +4,13 @@ let scaler = 2.5
 
 function loaded() {
     init()
-
     createMap()
-    createRobot()
     animate()
 }
 
 function init() {
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 100);
-    camera.position.set(20, 20, 50);
+    camera.position.set(20, 25, 55);
     camera.lookAt(new THREE.Vector3(0, 1, 0));
 
     scene = new THREE.Scene();
@@ -29,7 +27,7 @@ function init() {
     dirLight.position.set(0, 20, 10);
     scene.add(dirLight);
 
-    createFloor()
+    //createFloor()
     
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -43,16 +41,19 @@ function init() {
 
 function createFloor() {
     // ground
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), 
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(55, 55), 
                                 new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false }));
     mesh.rotation.x = - Math.PI / 2;
     scene.add(mesh);
 
+    addGridHelper();
+}
+
+function addGridHelper() {
     const grid = new THREE.GridHelper(50, 20, 0x000000, 0x000000);
     grid.material.opacity = 0.2;
     grid.material.transparent = true;
     scene.add(grid);
-
 }
 
 function onWindowResize() {
