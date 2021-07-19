@@ -5,10 +5,25 @@ let currentItem =  null
 let direction = 'south'
 let angle = 0
 let mousePos = [0,0]
+let movement = null
+let forward = true
+let startx = 0
+let starty = 0
 
 // map route
 function initMap(x, y) {
-    console.log('start',x,y)
+    startx = x
+    starty = y
+    mouseRoute = []
+    candidatesStack = []
+    visited = []
+    currentItem =  null
+    direction = 'south'
+    angle = 0
+    mousePos = [0,0]
+    movement = null
+    forward = true
+
     //append route item [direction, parent, child]  
     currentItem = ['south', [-1,-1], [x, y]]
     mouseRoute[mouseRoute.length] = currentItem
@@ -17,7 +32,6 @@ function initMap(x, y) {
 }
 
 function popRoute(){
-    console.log('pop', mouseRoute)
     return mouseRoute.pop()
 }
     
@@ -84,7 +98,7 @@ function moveForward() {
         console.log('map error, star not found')
     }
 
-    console.log("move", item[2][0], item[2][1])
+    //console.log("move", item[2][0], item[2][1])
     visited[visited.length] = item[2]
     return item
 }
@@ -92,22 +106,32 @@ function moveForward() {
 // robot next step
 function nextStep() {
     //console.log('nextStep')
-    let item = moveForward()
+    if (forward) {
+        movement = moveForward()
+    }
 
     // check if robot needs to move backward
     let itemRoute = lastRoute()
-    while (item[1][0] != itemRoute[2][0] || item[1][1] != itemRoute[2][1]) { 
+    if (movement[1][0] != itemRoute[2][0] || movement[1][1] != itemRoute[2][1]) { 
+        forward = false
         itemRoute = popRoute()
         itemRoute = [revertDir(itemRoute[0]), itemRoute[1], itemRoute[2]]  // revert direction
         mouseBackward(itemRoute)
         itemRoute = lastRoute()
-    }
-
-    // check if robot found the star
-    if (isStar(item[2][0],item[2][1])) {
-        console.log('game finished')
     } else {
-        mouseForward(item)
+        forward = true
+        // check if robot found the star
+        if (isStar(movement[2][0], movement[2][1])) {
+            changeEmotion(5)
+            // reset after 3 secs
+            let timer = setInterval(function(){
+                initMap(startx, starty)
+                resetRobot(startx, starty)
+                clearInterval(timer);
+            }, 2000);
+        } else {
+            mouseForward(movement)
+        }
     }
 }
 
@@ -120,19 +144,19 @@ function mouseForward(item) {
 
 function mouseBackward(item) {
     mousePos = item[1]
-    console.log('back', mousePos[0], mousePos[1])
+    //console.log('back', mousePos[0], mousePos[1])
     createRobotTweet(item[0]) 
 }
 
 //rotation and move robot 
-function createRobotTweet(dir) {
+function createRobotTweet(dir, id) {
     if (direction != dir) {
         angle = calculateAngle(dir) 
         direction = dir
         console.log('change angle', direction, angle)
         createRotationTweet(angle)      // rotate robot
     }
-    createTweet(direction)   // move robot
+    createTweet(direction, id)   // move robot
 }
 
 function revertDir(dir) {

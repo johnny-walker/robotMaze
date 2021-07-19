@@ -19,6 +19,17 @@ function createRobot(x, z) {
     });
 }
 
+function resetRobot(x, z) {
+    let size = Math.floor(mapinfo.length/2)
+    robot.position.x = (x-size) * scaler;
+    robot.position.z = (z-size) * scaler;
+    robot.rotation.y = 0;
+    let id = randint(1, 3)
+    changeState(id)
+    nextStep();
+
+}
+
 function queryActions(model, animations) {
     mixer = new THREE.AnimationMixer(model);
     actions = {};
@@ -65,22 +76,23 @@ function randint(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
     
-function changeEmotion(){
+function changeEmotion(id=-1){
     function restoreEmotion() {
         mixer.removeEventListener('finished', restoreEmotion)
-        fadeToAction(api.state, 0.2)
+        fadeToAction('Walking', 0.2)
     }
-    emotionID = randint(0, emotes.length-1)
+    emotionID = (id<0) ? randint(0, emotes.length-1) : id
     fadeToAction(emotes[emotionID], 1)
     mixer.addEventListener('finished', restoreEmotion)
 }
 
-function changeState(){
+function changeState(id=-1){
     function restoreState() {
         mixer.removeEventListener('finished', restoreState)
         fadeToAction(api.state, 0.5)
     }
-    statesID = randint(0, states.length-1)
+    
+    statesID = (id<0) ? randint(0, states.length-1) : id
     fadeToAction(states[statesID], 1)
     mixer.addEventListener('finished', restoreState)
 }
@@ -93,7 +105,7 @@ function morphFace(){
 }
 
 // movment
-function createTweet(dir) {
+function createTweet(dir, id) {
     let steps = 1 * scaler
     let speed = 400
     let denominator = (api.state == 'Walking') ? 1 : 2;
@@ -101,7 +113,7 @@ function createTweet(dir) {
     let offset = { step: 0 }                    // 起始出發值，之後 onUpdate 會一直改變他 
     let target = { step: steps }                // 起始目標值，之後會一直被改變
     let position = new THREE.Vector3 (0, 0, 0)
-    console.log(robot.position)
+    //console.log(robot.position)
     position.copy( robot.position );
 
     // 移動
@@ -126,8 +138,9 @@ function createTweet(dir) {
             tween.stop()
 
             morphFace()
-            //changeState()
-            //changeEmotion()
+            if (id >= 0) {
+                changeState(id)
+            }
             nextStep()
         })
 
@@ -140,8 +153,8 @@ function createRotationTweet(angle) {
     robot.rotation.y = angle
     return
 
-    let offset = { step: 0 }                 // 起始出發值，之後 onUpdate 會一直改變他 
-    let target = { step: angle }         // 起始目標值，之後會一直被改變
+    let offset = { step: 0 }                                // 起始出發值，之後 onUpdate 會一直改變他 
+    let target = { step: angle }                            // 起始目標值，之後會一直被改變
     
     // 旋轉
     const onUpdate = () => {

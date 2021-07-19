@@ -2,7 +2,7 @@ let mapinfo = []
 let stars = []
 
 function loadMap(callback) {
-    const url = 'http://localhost:3000/map'
+    const url = 'http://localhost:5000/map'
     
     let xmlhttp = new XMLHttpRequest()
     let method = 'GET'
@@ -25,21 +25,23 @@ function createMap() {
     loadMap( function (map) {
         let x = 0, z = 0
         mapinfo = map
-        for (let j = 0; j < 21; j++) {
+        let size = Math.floor(mapinfo.length/2)
+        for (let j = 0; j < mapinfo.length; j++) {
             //console.log(mapinfo[j])
-            for (let i = 0; i < 21; i++) {
+            for (let i = 0; i < mapinfo[0].length; i++) {
                 if (mapinfo[j][i] == '0'){
-                    createCube(i-10, 0, j-10)
+                    createCube(i-size, 0, j-size)
                 } else if (mapinfo[j][i] == '3') {
-                    createStar(i-10, 1, j-10)
+                    createStar(i-size, 1, j-size)
                 } else if (mapinfo[j][i] == '2') {
                     initMap(i, j)
-                    x = i-10
-                    z = j-10
+                    x = i-size
+                    z = j-size
                 }
             }
         }
         createRobot(x, z)
+        addGridHelper()
     })
 }
 

@@ -10,8 +10,8 @@ function loaded() {
 
 function init() {
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 100);
-    camera.position.set(20, 25, 55);
-    camera.lookAt(new THREE.Vector3(0, 1, 0));
+    camera.position.set(10, 25, 35);
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xb0c0ff);
@@ -28,7 +28,7 @@ function init() {
     scene.add(dirLight);
 
     //createFloor()
-    
+   
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -41,18 +41,20 @@ function init() {
 
 function createFloor() {
     // ground
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(55, 55), 
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), 
                                 new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false }));
     mesh.rotation.x = - Math.PI / 2;
     scene.add(mesh);
-
-    addGridHelper();
 }
 
 function addGridHelper() {
-    const grid = new THREE.GridHelper(50, 20, 0x000000, 0x000000);
+    const gridsize = 25;
+    const division = 10;
+    const grid = new THREE.GridHelper(gridsize, division, 0x000000, 0x000000);
     grid.material.opacity = 0.2;
     grid.material.transparent = true;
+    grid.translateX(scaler/2)
+    grid.translateZ(scaler/2)
     scene.add(grid);
 }
 

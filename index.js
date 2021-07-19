@@ -11,7 +11,7 @@ const fsPromises = fs.promises;
 async function loadMap() {
     try {
         // STEP 1: 讀取 CSV 檔
-        const inputFile = __dirname + '/res/map02.csv'
+        const inputFile = __dirname + '/res/map/map00.csv'
         const input = await fsPromises.readFile(inputFile)
 
         // STEP 2：建立讀出 CSV 用的陣列和 parser
@@ -68,7 +68,7 @@ app.get('/*', function (req, res) {
 
 
 //port 號會由 Heroku 給予，因此不再自行指定
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 5000
 
 app.listen(port, function () {
     let str = 'app listening on port ' + port + '!'
