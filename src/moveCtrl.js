@@ -17,7 +17,7 @@ function initMap(x, y) {
 }
 
 function popRoute(){
-    console.log('pop', lastRoute())
+    console.log('pop', mouseRoute)
     return mouseRoute.pop()
 }
     
@@ -84,7 +84,7 @@ function moveForward() {
         console.log('map error, star not found')
     }
 
-    console.log("move", item[2])
+    console.log("move", item[2][0], item[2][1])
     visited[visited.length] = item[2]
     return item
 }
@@ -93,11 +93,12 @@ function moveForward() {
 function nextStep() {
     //console.log('nextStep')
     let item = moveForward()
-    let itemRoute = lastRoute()
+
     // check if robot needs to move backward
-    while (itemRoute[2][0] != item[1][0] || itemRoute[2][1] != item[1][1]) {
+    let itemRoute = lastRoute()
+    while (item[1][0] != itemRoute[2][0] || item[1][1] != itemRoute[2][1]) { 
         itemRoute = popRoute()
-        itemRoute = [reverseDir(itemRoute[0]), itemRoute[1], itemRoute[2]]
+        itemRoute = [revertDir(itemRoute[0]), itemRoute[1], itemRoute[2]]  // revert direction
         mouseBackward(itemRoute)
         itemRoute = lastRoute()
     }
@@ -114,28 +115,27 @@ function mouseForward(item) {
     mousePos = item[2]
     mouseRoute[mouseRoute.length] = item
     currentItem = item
-
-    createRobotTweet(item)
+    createRobotTweet(item[0]) 
 }
 
 function mouseBackward(item) {
     mousePos = item[1]
-    console.log('back', mousePos)
-    createRobotTweet(item)    
+    console.log('back', mousePos[0], mousePos[1])
+    createRobotTweet(item[0]) 
 }
 
-function createRobotTweet(item) {
-    console.log(direction, item[0])
-    if (direction != item[0]) {
-        angle = calculateAngle(direction+item[0]) 
-        direction = item[0]
-        console.log(direction, angle)
+//rotation and move robot 
+function createRobotTweet(dir) {
+    if (direction != dir) {
+        angle = calculateAngle(dir) 
+        direction = dir
+        console.log('change angle', direction, angle)
         createRotationTweet(angle)      // rotate robot
     }
     createTweet(direction)   // move robot
 }
 
-function reverseDir(dir) {
+function revertDir(dir) {
     reverse = { 'east' : 'west', 
                 'west' : 'east', 
                 'north': 'south', 
@@ -144,18 +144,10 @@ function reverseDir(dir) {
 }
 
 function calculateAngle(dirs) {
-    angle = {['east'+'west']   :  Math.PI, 
-             ['east'+'south']  : -Math.PI/2, 
-             ['east'+'north']  :  Math.PI/2, 
-             ['west'+'east']   :  Math.PI, 
-             ['west'+'north']  : -Math.PI/2, 
-             ['west'+'south']  :  Math.PI/2, 
-             ['south'+'north'] :  Math.PI, 
-             ['south'+'east']  :  Math.PI/2, 
-             ['south'+'west']  : -Math.PI/2, 
-             ['north'+'south'] :  Math.PI, 
-             ['north'+'east']  : -Math.PI/2, 
-             ['north'+'west']  :  Math.PI/2, 
+    angle = {'west'  : -Math.PI/2, 
+             'south' :  0, 
+             'east'  :  Math.PI/2, 
+             'north' :  Math.PI, 
             } 
     return angle[dirs]
 }

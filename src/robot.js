@@ -93,7 +93,7 @@ function morphFace(){
 }
 
 // movment
-function createTweet(direction) {
+function createTweet(dir) {
     let steps = 1 * scaler
     let speed = 400
     let denominator = (api.state == 'Walking') ? 1 : 2;
@@ -101,19 +101,19 @@ function createTweet(direction) {
     let offset = { step: 0 }                    // 起始出發值，之後 onUpdate 會一直改變他 
     let target = { step: steps }                // 起始目標值，之後會一直被改變
     let position = new THREE.Vector3 (0, 0, 0)
-    //console.log(robot.position)
+    console.log(robot.position)
     position.copy( robot.position );
 
     // 移動
     const onUpdate = () => {
         //console.log(offset.step)
-        if (direction == 'south') {
+        if (dir == 'south') {
             robot.position.z = position.z + offset.step
-        } else if (direction == 'north') {
+        } else if (dir == 'north') {
             robot.position.z =  position.z - offset.step 
-        } else if (direction == 'east') {
+        } else if (dir == 'east') {
             robot.position.x = position.x + offset.step
-        } else if (direction == 'west') {
+        } else if (dir == 'west') {
             robot.position.x = position.x - offset.step
         }
     }
@@ -138,7 +138,6 @@ function createTweet(direction) {
 // rotation, radian angle
 function createRotationTweet(angle) {
     robot.rotation.y = angle
-    //createTweet()
     return
 
     let offset = { step: 0 }                 // 起始出發值，之後 onUpdate 會一直改變他 
