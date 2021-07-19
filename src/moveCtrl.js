@@ -153,10 +153,11 @@ function createRobotTweet(dir, id) {
     if (direction != dir) {
         angle = calculateAngle(dir) 
         direction = dir
-        console.log('change angle', direction, angle)
+        //console.log('change angle', direction, angle)
         createRotationTweet(angle)      // rotate robot
+    } else {
+        createTweet(direction, id)   // move robot
     }
-    createTweet(direction, id)   // move robot
 }
 
 function revertDir(dir) {

@@ -105,7 +105,7 @@ function morphFace(){
 }
 
 // movment
-function createTweet(dir, id) {
+function createTweet(dir, id=-1) {
     let steps = 1 * scaler
     let speed = 400
     let denominator = (api.state == 'Walking') ? 1 : 2;
@@ -149,20 +149,21 @@ function createTweet(dir, id) {
 }
 
 // rotation, radian angle
+let prevAngle = 0
 function createRotationTweet(angle) {
-    robot.rotation.y = angle
-    return
+    //robot.rotation.y = angle
+    //return
 
-    let offset = { step: 0 }                                // 起始出發值，之後 onUpdate 會一直改變他 
+    let offset = { step: prevAngle }                                // 起始出發值，之後 onUpdate 會一直改變他 
     let target = { step: angle }                            // 起始目標值，之後會一直被改變
-    
+    prevAngle = angle
     // 旋轉
     const onUpdate = () => {
         robot.rotation.y = offset.step
     }
 
     let tween = new TWEEN.Tween(offset)                     // 起點為 offset
-        .to(target, 1000)                                   // 設訂多少ms內移動至 target
+        .to(target, 250)                                   // 設訂多少ms內移動至 target
         //.easing(TWEEN.Easing.Quadratic.Out)
         .onUpdate(onUpdate)
         .onComplete(() => {
@@ -170,7 +171,7 @@ function createRotationTweet(angle) {
 
             morphFace()
             //changeEmotion()
-            createTweet()
+            createTweet(direction)
         })
 
     // 開始移動

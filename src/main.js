@@ -2,15 +2,20 @@ let clock, mixer;
 let camera, scene, renderer, controls;
 let scaler = 2.5
 
+
 function loaded() {
     init()
     createMap()
     animate()
+
+    let bgm = document.getElementById('bgm')
+    bgm.volume = 0.5
+    bgm.play()
 }
 
 function init() {
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.25, 100);
-    camera.position.set(10, 25, 35);
+    camera.position.set(20, 23, 35);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     scene = new THREE.Scene();
