@@ -4,7 +4,7 @@ const csv = require('csv')
 
 const fsPromises = fs.promises
 let map = []
-let record = ['0' * 20]
+let record = []
 
 async function loadMap(inputFile, calbak) {
     try {
