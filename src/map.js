@@ -73,3 +73,10 @@ function createStar(x, y, z) {
         stars.push(mesh)
     })
 }
+
+function addGridHelper() {
+    const grid = new THREE.GridHelper(cellsize, cellnum, 0x000000, 0x000000);
+    grid.material.opacity = 0.2;
+    grid.material.transparent = true;
+    scene.add(grid);
+}

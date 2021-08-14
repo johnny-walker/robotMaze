@@ -49,13 +49,6 @@ function createFloor() {
     scene.add(mesh);
 }
 
-function addGridHelper() {
-    const grid = new THREE.GridHelper(cellsize, cellnum, 0x000000, 0x000000);
-    grid.material.opacity = 0.2;
-    grid.material.transparent = true;
-    scene.add(grid);
-}
-
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
