@@ -34,7 +34,7 @@ function createMap() {
                 } else if (mapinfo[j][i] == '3') {
                     createStar(i-size, 1, j-size)
                 } else if (mapinfo[j][i] == '2') {
-                    initMap(i, j)
+                    initMoveCtrl(i, j)   // in moveCtrl.js
                     x = i-size
                     z = j-size
                 }
@@ -45,10 +45,8 @@ function createMap() {
     })
 }
 
-
 // cube
 function createCube(x, y, z) {
-
     let cubeGeo = new THREE.BoxGeometry(2, 2, 2);
     let cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xb0c0ff, map: new THREE.TextureLoader().load('res/wall.jpg') });
     let voxel = new THREE.Mesh(cubeGeo, cubeMaterial);
@@ -58,6 +56,7 @@ function createCube(x, y, z) {
 
 // star
 function createStar(x, y, z) {
+    // https://threejs.org/docs/#examples/en/loaders/OBJLoader
     let loader = new THREE.OBJLoader()
     let starMat = new THREE.MeshStandardMaterial({ color: 0xfeb74c })
     loader.load('res/star.obj', function (mesh) {

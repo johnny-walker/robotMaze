@@ -11,7 +11,7 @@ let startx = 0
 let starty = 0
 
 // map route
-function initMap(x, y) {
+function initMoveCtrl(x, y) {
     startx = x
     starty = y
     mouseRoute = []
@@ -125,7 +125,7 @@ function nextStep() {
             changeEmotion(5)
             // reset after 3 secs
             let timer = setInterval(function(){
-                initMap(startx, starty)
+                initMoveCtrl(startx, starty)
                 resetRobot(startx, starty)
                 clearInterval(timer);
             }, 2000);

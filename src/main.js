@@ -43,7 +43,6 @@ function init() {
 }
 
 function createFloor() {
-    // ground
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), 
                                 new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false }));
     mesh.rotation.x = - Math.PI / 2;
