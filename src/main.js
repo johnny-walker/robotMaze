@@ -1,7 +1,9 @@
 let clock, mixer;
 let camera, scene, renderer, controls;
-let scaler = 2.5
 
+cellsize =  25
+cellnum = 9
+scaler = cellsize / cellnum
 
 function loaded() {
     init()
@@ -49,13 +51,9 @@ function createFloor() {
 }
 
 function addGridHelper() {
-    const gridsize = 25;
-    const division = 10;
-    const grid = new THREE.GridHelper(gridsize, division, 0x000000, 0x000000);
+    const grid = new THREE.GridHelper(cellsize, cellnum, 0x000000, 0x000000);
     grid.material.opacity = 0.2;
     grid.material.transparent = true;
-    grid.translateX(scaler/2)
-    grid.translateZ(scaler/2)
     scene.add(grid);
 }
 
