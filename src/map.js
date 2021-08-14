@@ -40,7 +40,7 @@ function createMap() {
                 }
             }
         }
-        createRobot(x, z)
+        createRobot(x, z)   // in robot.js
         addGridHelper()
     })
 }

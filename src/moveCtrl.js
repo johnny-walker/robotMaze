@@ -103,6 +103,17 @@ function moveForward() {
     return item
 }
 
+// restart from the start point
+function resetRoute() {
+    changeEmotion(5)
+    // reset after 3 secs
+    let timer = setInterval(function(){
+        initMoveCtrl(startx, starty)
+        resetRobot(startx, starty)
+        clearInterval(timer);
+    }, 2000);
+}
+
 // robot next step
 function nextStep() {
     //console.log('nextStep')
@@ -122,13 +133,7 @@ function nextStep() {
         forward = true
         // check if robot found the star
         if (isStar(movement[2][0], movement[2][1])) {
-            changeEmotion(5)
-            // reset after 3 secs
-            let timer = setInterval(function(){
-                initMoveCtrl(startx, starty)
-                resetRobot(startx, starty)
-                clearInterval(timer);
-            }, 2000);
+            resetRoute()
         } else {
             mouseForward(movement)
         }
