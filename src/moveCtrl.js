@@ -156,7 +156,7 @@ function createRobotTweet(dir, id) {
         //console.log('change angle', direction, angle)
         createRotationTweet(angle)      // rotate robot
     } else {
-        createTweet(direction, id)   // move robot
+        createTweet(direction, id)      // move robot
     }
 }
 
