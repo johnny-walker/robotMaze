@@ -1,9 +1,9 @@
 let clock, mixer;
 let camera, scene, renderer, controls;
 
-cellsize =  25
+gridsize =  25
 cellnum = 9
-scaler = cellsize / cellnum
+scaler = gridsize / cellnum
 
 function loaded() {
     init()
